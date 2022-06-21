@@ -1,1 +1,1 @@
-# TPCraftLauncher
+# Minecraft Launcher
