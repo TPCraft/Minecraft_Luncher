@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Downloader;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -67,7 +65,7 @@ namespace TPCraftLauncher
                     {
                         Label_CheckFile.Content = "(" + CheckFileNumber_View.Count + " / " + ((JArray)Config["Data"]).Count + ")";
                         ProgressBar_CheckFile.Value = CheckFileNumber_View.Count;
-                        Label_DownloadFile.Content = "(" + DownloadSuccessNumber + " / " + DownloadFileNumber_View.Count + ") (成功: " + DownloadSuccessNumber + " 失败: " + DownloadFailNumber + ")";
+                        Label_DownloadFile.Content = "(" + (DownloadSuccessNumber + DownloadFailNumber) + " / " + DownloadFileNumber_View.Count + ") (成功: " + DownloadSuccessNumber + " 失败: " + DownloadFailNumber + ")";
                         ProgressBar_DownloadFile.Value = DownloadSuccessNumber + DownloadFailNumber;
                         Label_ChangeFile.Content = "(" + ChangeNumber + " / " + ChangeFileNumber_View.Count + ")";
                         ProgressBar_ChangeFile.Value = ChangeNumber;
@@ -162,19 +160,20 @@ namespace TPCraftLauncher
         //下载客户端资源
         private async void DownloadFile()
         {
-            var DownloadOpt = new DownloadConfiguration()
-            {
-                ChunkCount = 8,
-                OnTheFlyDownload = true,
-                ParallelDownload = true
-            };
-            var Downloader = new DownloadService(DownloadOpt);
             for (int I = 0; DownloadFileNumber.Count > I; I++)
             {
-                Downloader.DownloadFileTaskAsync(Config["Data"][DownloadFileNumber[I]]["Download"].ToString(), (string)Config["Data"][DownloadFileNumber[I]]["Path"] + "\\" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]).Wait();
-                if (File.Exists((string)Config["Data"][DownloadFileNumber[I]]["Path"] + "\\" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]))
+                Dispatcher.Invoke(new Action(delegate
                 {
-                    if (FileMd5((string)Config["Data"][DownloadFileNumber[I]]["Path"] + "\\" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]) == (string)Config["Data"][DownloadFileNumber[I]]["Md5"])
+                    Label_DownloadFileInfo.Content = (string)Config["Data"][DownloadFileNumber[I]]["Path"] + "/" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"];
+                }));
+                Directory.CreateDirectory((string)Config["Data"][DownloadFileNumber[I]]["Path"]);
+                using (var Web = new WebClient())
+                {
+                    Web.DownloadFile((string)Config["Data"][DownloadFileNumber[I]]["Download"], (string)Config["Data"][DownloadFileNumber[I]]["Path"] + "/" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]);
+                }
+                if (File.Exists((string)Config["Data"][DownloadFileNumber[I]]["Path"] + "/" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]))
+                {
+                    if (FileMd5((string)Config["Data"][DownloadFileNumber[I]]["Path"] + "/" + (string)Config["Data"][DownloadFileNumber[I]]["Filename"]) == (string)Config["Data"][DownloadFileNumber[I]]["Md5"])
                     {
                         DownloadSuccessNumber++;
                     } 
@@ -192,6 +191,7 @@ namespace TPCraftLauncher
             {
                 ProgressBar_ChangeFile.IsIndeterminate = false;
                 ProgressBar_ChangeFile.Maximum = ChangeFileNumber.Count;
+                Label_DownloadFileInfo.Content = "";
             }));
             Thread Thread_ChangeFile = new Thread(new ThreadStart(ChangeFile));
             Thread_ChangeFile.Start();
@@ -202,7 +202,10 @@ namespace TPCraftLauncher
         {
             for (int I = 0; ChangeFileNumber.Count > I; I++)
             {
-                File.Delete((string)Config["Data"][ChangeFileNumber[I]]["Path"] + "\\" + (string)Config["Data"][ChangeFileNumber[I]]["Filename"]);
+                if (File.Exists((string)Config["Data"][ChangeFileNumber[I]]["Path"] + "/" + (string)Config["Data"][ChangeFileNumber[I]]["Filename"]))
+                {
+                    File.Delete((string)Config["Data"][ChangeFileNumber[I]]["Path"] + "/" + (string)Config["Data"][ChangeFileNumber[I]]["Filename"]);
+                }
                 ChangeNumber++;
                 await Task.Delay(100);
             } 

@@ -31,6 +31,7 @@
                         <ProgressBar x:Name="ProgressBar_CheckFile" IsIndeterminate="True" materialDesign:TransitionAssist.DisableTransitions="True" Height="10" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="10,45,10,0" />
                         <Label Content="下载客户端资源" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,65,0,0" FontSize="15"/>
                         <Label x:Name="Label_DownloadFile" Content="(0 / 0)" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,65,0,0" FontSize="15"/>
+                        <Label x:Name="Label_DownloadFileInfo" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="10" Width="480"/>
                         <ProgressBar x:Name="ProgressBar_DownloadFile" IsIndeterminate="True" materialDesign:TransitionAssist.DisableTransitions="True" Height="10" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="10,100,10,0" />
                         <Label Content="修改客户端资源" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,120,0,0" FontSize="15"/>
                         <Label x:Name="Label_ChangeFile" Content="(0 / 0)" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,120,0,0" FontSize="15"/>
